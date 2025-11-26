@@ -1,0 +1,7 @@
+{
+  "name": "FlowState Task Architect",
+  "description": "A personality-based dynamic task scheduler that breaks down anxiety-inducing goals into actionable micro-steps tailored to your Gallup strengths.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
