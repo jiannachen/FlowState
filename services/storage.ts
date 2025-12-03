@@ -155,18 +155,45 @@ export const saveDocs = async (docsList: DocumentAsset[]): Promise<void> => {
       }
       const userId = userList[0].id;
 
-      await db.delete(documents);
+      // Use upsert strategy: get existing docs and compare
+      const existingDocs = await db.select().from(documents);
+      const existingIds = new Set(existingDocs.map(d => d.id));
 
+      // Update or insert each doc
       for (const doc of docsList) {
-        await db.insert(documents).values({
+        const docData = {
           id: doc.id,
           userId: userId,
           title: doc.title,
           category: doc.category,
           blocks: doc.blocks,
           lastModified: new Date(doc.lastModified)
-        });
+        };
+
+        if (existingIds.has(doc.id)) {
+          // Update existing document
+          await db.update(documents)
+            .set({
+              title: doc.title,
+              category: doc.category,
+              blocks: doc.blocks,
+              lastModified: new Date(doc.lastModified)
+            })
+            .where(eq(documents.id, doc.id));
+        } else {
+          // Insert new document
+          await db.insert(documents).values(docData);
+        }
       }
+
+      // Delete docs that no longer exist in the list
+      const currentIds = new Set(docsList.map(d => d.id));
+      for (const existingDoc of existingDocs) {
+        if (!currentIds.has(existingDoc.id)) {
+          await db.delete(documents).where(eq(documents.id, existingDoc.id));
+        }
+      }
+
       return;
     } catch (error) {
       console.error('Database error, falling back to localStorage:', error);

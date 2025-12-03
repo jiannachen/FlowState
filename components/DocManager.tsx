@@ -65,10 +65,11 @@ export const DocManager: React.FC<Props> = ({ docs, onUpdateDocs }) => {
 
   const updateBlock = (blockId: string, content: string) => {
     if (!activeDoc) return;
-    const updatedDocs = docs.map(d => 
+    const updatedDocs = docs.map(d =>
       d.id === activeDoc.id ? {
         ...d,
-        blocks: d.blocks.map(b => b.id === blockId ? { ...b, content } : b)
+        blocks: d.blocks.map(b => b.id === blockId ? { ...b, content } : b),
+        lastModified: Date.now()
       } : d
     );
     onUpdateDocs(updatedDocs);
@@ -76,13 +77,13 @@ export const DocManager: React.FC<Props> = ({ docs, onUpdateDocs }) => {
 
   const updateDocTitle = (title: string) => {
     if (!activeDoc) return;
-    const updatedDocs = docs.map(d => d.id === activeDoc.id ? { ...d, title } : d);
+    const updatedDocs = docs.map(d => d.id === activeDoc.id ? { ...d, title, lastModified: Date.now() } : d);
     onUpdateDocs(updatedDocs);
   }
 
   const deleteBlock = (blockId: string) => {
     if (!activeDoc) return;
-     const updated = docs.map(d => d.id === activeDoc.id ? { ...d, blocks: d.blocks.filter(b => b.id !== blockId) } : d);
+     const updated = docs.map(d => d.id === activeDoc.id ? { ...d, blocks: d.blocks.filter(b => b.id !== blockId), lastModified: Date.now() } : d);
      onUpdateDocs(updated);
   };
 
@@ -136,12 +137,12 @@ export const DocManager: React.FC<Props> = ({ docs, onUpdateDocs }) => {
                     
                     {/* Header: Label and Actions */}
                     <div className="flex justify-between items-center p-3 border-b border-stone-50 bg-stone-50/50">
-                      <input 
+                      <input
                         className="text-xs font-bold uppercase tracking-wider text-stone-400 bg-transparent outline-none"
                         value={block.label}
                         onChange={(e) => {
-                           const updatedDocs = docs.map(d => 
-                             d.id === activeDoc.id ? { ...d, blocks: d.blocks.map(b => b.id === block.id ? { ...b, label: e.target.value } : b) } : d
+                           const updatedDocs = docs.map(d =>
+                             d.id === activeDoc.id ? { ...d, blocks: d.blocks.map(b => b.id === block.id ? { ...b, label: e.target.value } : b), lastModified: Date.now() } : d
                            );
                            onUpdateDocs(updatedDocs);
                         }}
